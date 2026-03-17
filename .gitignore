@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+*.bin
+*.safetensors
+outputs/
+wandb/
+*.ipynb_checkpoints
+.kaggle/
