@@ -192,7 +192,6 @@ def collect_all_pairs(medquad_path: Path) -> list[dict]:
     print(f"Extracted {len(all_pairs)} raw Q&A pairs")
     return all_pairs
 
-
 def filter_and_classify(pairs: list[dict]) -> dict[str, list[dict]]:
     """Filter for symptom-related pairs and classify into triage levels."""
     classified = {
@@ -223,11 +222,24 @@ def filter_and_classify(pairs: list[dict]) -> dict[str, list[dict]]:
 def build_examples(classified: dict[str, list[dict]],
                    train_per_class: int = 375,
                    test_per_class: int = 25) -> tuple[list, list]:
-    """Build balanced train and test sets."""
+    """Build balanced train and test sets with global deduplication."""
     train_examples = []
     test_examples  = []
 
+    # Global deduplication across all classes
+    global_seen = set()
+    deduped_classified = {}
     for level, pairs in classified.items():
+        unique = []
+        for p in pairs:
+            key = p["question"].strip().lower()
+            if key not in global_seen:
+                global_seen.add(key)
+                unique.append(p)
+        deduped_classified[level] = unique
+        print(f"  {level}: {len(unique)} unique examples after global dedup")
+
+    for level, pairs in deduped_classified.items():
         needed = train_per_class + test_per_class
 
         if len(pairs) < needed:
@@ -239,25 +251,23 @@ def build_examples(classified: dict[str, list[dict]],
 
         for pair in sample[:test_per_class]:
             test_examples.append({
-                "instruction": INSTRUCTION,
-                "input":       pair["question"],
-                "output":      build_output(level, pair["answer"]),
+                "instruction":  INSTRUCTION,
+                "input":        pair["question"],
+                "output":       build_output(level, pair["answer"]),
                 "triage_level": level,
             })
 
         for pair in sample[test_per_class:test_per_class + train_per_class]:
             train_examples.append({
-                "instruction": INSTRUCTION,
-                "input":       pair["question"],
-                "output":      build_output(level, pair["answer"]),
+                "instruction":  INSTRUCTION,
+                "input":        pair["question"],
+                "output":       build_output(level, pair["answer"]),
                 "triage_level": level,
             })
 
     random.shuffle(train_examples)
     random.shuffle(test_examples)
     return train_examples, test_examples
-
-
 def write_jsonl(examples: list[dict], path: Path) -> None:
     """Write examples to JSONL file."""
     path.parent.mkdir(parents=True, exist_ok=True)
