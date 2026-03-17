@@ -1,0 +1,22 @@
+# Model
+model_name: "microsoft/Phi-3-mini-4k-instruct"
+
+# Data
+train_data_path: "data/dataset_train.jsonl"
+output_dir: "outputs/phi3-medical-triage"
+
+# LoRA (r=8 for T4 16GB budget)
+lora_r: 8
+lora_alpha: 16
+lora_target_modules: ["q_proj", "v_proj"]
+lora_dropout: 0.1
+
+# Training
+num_epochs: 3
+batch_size: 4
+gradient_accumulation_steps: 4
+learning_rate: 0.0002
+max_grad_norm: 0.3
+warmup_ratio: 0.03
+lr_scheduler: "cosine"
+max_seq_length: 512
