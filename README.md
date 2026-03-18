@@ -13,6 +13,7 @@
 <br/>
 
 **[🤗 Model on Hugging Face](https://huggingface.co/Milon96/phi3-medical-triage)** &nbsp;·&nbsp;
+**[🚀 Live Demo](https://huggingface.co/spaces/Milon96/medical-triage-demo)** &nbsp;·&nbsp;
 **[📊 Evaluation Results](#evaluation-results)** &nbsp;·&nbsp;
 **[⚙️ Training](#training)** &nbsp;·&nbsp;
 **[🚀 Quick Start](#quick-start)**
