@@ -34,14 +34,16 @@ def load_jsonl(path: str) -> list[dict]:
 
 
 def extract_triage_level(text: str) -> str:
-    """Extract triage level label from model output."""
+    """Extract triage level label from model output.
+    Check longer strings first to avoid URGENT matching inside SEMI-URGENT.
+    """
     text_upper = text.upper()
-    # Try exact match first
-    for level in VALID_LEVELS:
+    # Order matters — check longer/more specific strings first
+    ordered_levels = ["SEMI-URGENT", "NON-URGENT", "EMERGENCY", "URGENT"]
+    for level in ordered_levels:
         if f"TRIAGE LEVEL: {level}" in text_upper:
             return level
-    # Fallback: find level anywhere in text
-    for level in VALID_LEVELS:
+    for level in ordered_levels:
         if level in text_upper:
             return level
     return "UNKNOWN"
